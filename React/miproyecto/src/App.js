@@ -1,81 +1,73 @@
-import React,{Component} from 'react';
+import React from 'react';
 import './App.css';
-import axios from 'axios';
 
+const request = require('request-promise');
 
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                inputField: "Value", film: null
+            };
+            this.updateInputValue = this.updateInputValue.bind(this);
+        }
+        handlerBtn = () => {
 
-class App extends React.Component {
-
-  constructor(props){
-    super(props);
-    this.handlerClick = this.handlerClick.bind(this);
-    this.handlerChange = this.handlerChange.bind(this);
-    this.state = {consulteApi:false} ;
-  }
-
-  handlerClick(){
-    console.log("handleado");
-    
-    var nombre = this.state.nombre;
-    
-
-    axios.get('https://swapi.dev/api/films/?search=',{params:{title:nombre}})
-      .then( response =>{
-        console.log(response.data);
-        this.setState({consulteApi:true, data: response.data});
-      })
-      .catch(error => {
-        // handle error
-        console.log(error);
-      });
-  }
-
-  handlerChange(event){
-
-    this.setState({nombre: event.target.value});
-  }
-
-  render (){
-
-    var resultados;
-      if(this.state.consulteApi != 0){
-
-        const pelicula = this.state.data[0].title.map((o)=>
-          <li key={o}>{o}</li>
-        );
-
-        resultados = (
-          <div> 
-            <h2>{this.state.data[0].title}</h2>
-            <p><strong>Titulo: </strong>{this.state.data[0].title}</p>
-            <p><strong>Pelicula:</strong></p>
-            <p><strong>Episodio: </strong>{this.state.data[0].episode_id}</p>
-            <p><strong>Director: </strong>{this.state.data[0].director}</p>
-            <p><strong>Productor: </strong> {this.state.data[0].producer}</p>
+            var options = {
+                method: 'GET',
+                uri: `https://swapi.dev/api/films/${this.state.inputField}` ,
+                json: true
+            };
       
-          </div>
-        );
-      }else{
-        resultados = <div></div>
-      }
+            var response = request(options).then(film => {
+
+                console.log(film.title);
+                console.log(film.episode_id);
+                this.setState({
+                         
+                    film: film
+                })
+                console.log(this.state);
+            });
+           
+        }
+
+        numberList = () => {
+                return(<ul><li>{this.state.film.powerstats.combat}</li>
+                <li>{this.state.inputField}</li></ul>)
+        }
+        updateInputValue(evt) {
+
+            this.setState ({inputField: evt.target.value});
+
+        }
+        
+
+render() {
+   
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1>Star Wars API</h1>
-          <p>Pelicula: </p>
-          <input className="boton" type="text" onChange={this.handlerChange} ></input>
-          <button className="boton" onClick={this.handlerClick}>Buscar</button>
-         
-          {resultados}
-          
-          
-        </header>
-      </div>
+
+        <div className='container'>
+
+            <button onClick={this.handlerBtn}> Obtener datos de Api </button>
+            <input type="text" onChange={ this.updateInputValue} onKeyPress={this.handlerPress} placeholder='Número de pelicula' />
+            <h1 class='center'>Ingresa el número de película y obtene su información</h1>
+            {this.state.film &&   
+           <div className='container'>
+                <h1 class='center'>Titulo: {this.state.film.title}</h1>
+                <ul>
+                    <li class='center'>Episodio:{this.state.film.episode_id}</li>
+                    <li class='center'>Director:{this.state.film.director}</li>
+                    <li class='center'>Productor:{this.state.film.producer}</li>
+                    <li class='center'>Estreno:{this.state.film.release_date}</li>
+                </ul>
+            </div>  
+            }
+            
+        </div>      
+        
     );
-
-  } 
-
 }
 
-
+}
 export default App;
